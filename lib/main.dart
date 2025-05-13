@@ -7,7 +7,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class Task {
   Color? color;
 
   Task({
-    required this.title, 
+    required this.title,
     this.isCompleted = false,
     DateTime? createdAt,
     this.color,
@@ -92,26 +92,30 @@ class Task {
     return Task(
       title: json['title'],
       isCompleted: json['isCompleted'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt']) : DateTime.now(),
+      createdAt:
+          json['createdAt'] != null
+              ? DateTime.parse(json['createdAt'])
+              : DateTime.now(),
       color: json['color'] != null ? Color(json['color']) : null,
     );
   }
 }
 
 class TodoListScreen extends StatefulWidget {
-  const TodoListScreen({Key? key}) : super(key: key);
+  const TodoListScreen({super.key});
 
   @override
   _TodoListScreenState createState() => _TodoListScreenState();
 }
 
-class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProviderStateMixin {
+class _TodoListScreenState extends State<TodoListScreen>
+    with SingleTickerProviderStateMixin {
   List<Task> _tasks = [];
   final TextEditingController _textController = TextEditingController();
   late AnimationController _animationController;
   TaskFilter _currentFilter = TaskFilter.all;
   Color _selectedColor = Colors.indigoAccent;
-  
+
   final List<Color> _availableColors = [
     Colors.redAccent,
     Colors.orangeAccent,
@@ -146,18 +150,15 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
     final tasksJson = prefs.getStringList('tasks') ?? [];
 
     setState(() {
-      _tasks = tasksJson
-          .map((task) => Task.fromJson(jsonDecode(task)))
-          .toList();
+      _tasks =
+          tasksJson.map((task) => Task.fromJson(jsonDecode(task))).toList();
     });
   }
 
   // Guardar tareas en SharedPreferences
   Future<void> _saveTasks() async {
     final prefs = await SharedPreferences.getInstance();
-    final tasksJson = _tasks
-        .map((task) => jsonEncode(task.toJson()))
-        .toList();
+    final tasksJson = _tasks.map((task) => jsonEncode(task.toJson())).toList();
     await prefs.setStringList('tasks', tasksJson);
   }
 
@@ -165,17 +166,16 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
   void _addTask(String title) {
     if (title.isNotEmpty) {
       setState(() {
-        _tasks.add(Task(
-          title: title,
-          color: _selectedColor,
-        ));
+        _tasks.add(Task(title: title, color: _selectedColor));
         _tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       });
       _saveTasks();
       _textController.clear();
-      
+
       // Animación de confirmación
-      _animationController.forward().then((_) => _animationController.reverse());
+      _animationController.forward().then(
+        (_) => _animationController.reverse(),
+      );
     }
   }
 
@@ -198,7 +198,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
         _tasks.removeAt(actualIndex);
       });
       _saveTasks();
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('Tarea eliminada'),
@@ -223,7 +223,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
   void _showEditDialog(int index) {
     final actualIndex = _getActualIndex(index);
     if (actualIndex == -1) return;
-    
+
     final TextEditingController editController = TextEditingController();
     editController.text = _tasks[actualIndex].title;
     Color selectedColor = _tasks[actualIndex].color ?? _selectedColor;
@@ -255,26 +255,31 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _availableColors.map((color) {
-                      return GestureDetector(
-                        onTap: () {
-                          setDialogState(() {
-                            selectedColor = color;
-                          });
-                        },
-                        child: Container(
-                          width: 36,
-                          height: 36,
-                          decoration: BoxDecoration(
-                            color: color,
-                            shape: BoxShape.circle,
-                            border: selectedColor == color
-                                ? Border.all(color: Colors.black, width: 2)
-                                : null,
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                    children:
+                        _availableColors.map((color) {
+                          return GestureDetector(
+                            onTap: () {
+                              setDialogState(() {
+                                selectedColor = color;
+                              });
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                                border:
+                                    selectedColor == color
+                                        ? Border.all(
+                                          color: Colors.black,
+                                          width: 2,
+                                        )
+                                        : null,
+                              ),
+                            ),
+                          );
+                        }).toList(),
                   ),
                 ],
               ),
@@ -300,7 +305,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
                 ),
               ],
             );
-          }
+          },
         );
       },
     );
@@ -312,7 +317,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
     if (displayIndex < 0 || displayIndex >= filteredTasks.length) {
       return -1;
     }
-    
+
     final Task task = filteredTasks[displayIndex];
     return _tasks.indexOf(task);
   }
@@ -333,7 +338,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final filteredTasks = _getFilteredTasks();
-    
+
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -424,26 +429,31 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: _availableColors.map((color) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _selectedColor = color;
-                              });
-                            },
-                            child: Container(
-                              width: 30,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: color,
-                                shape: BoxShape.circle,
-                                border: _selectedColor == color
-                                    ? Border.all(color: Colors.black, width: 2)
-                                    : null,
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        children:
+                            _availableColors.map((color) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedColor = color;
+                                  });
+                                },
+                                child: Container(
+                                  width: 30,
+                                  height: 30,
+                                  decoration: BoxDecoration(
+                                    color: color,
+                                    shape: BoxShape.circle,
+                                    border:
+                                        _selectedColor == color
+                                            ? Border.all(
+                                              color: Colors.black,
+                                              width: 2,
+                                            )
+                                            : null,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                       ),
                     ],
                   ),
@@ -453,41 +463,41 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
           ),
           SliverPadding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            sliver: filteredTasks.isEmpty
-                ? SliverFillRemaining(
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.task_alt,
-                            size: 70,
-                            color: Colors.grey[400],
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            _getEmptyStateMessage(),
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.grey[700],
+            sliver:
+                filteredTasks.isEmpty
+                    ? SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.task_alt,
+                              size: 70,
+                              color: Colors.grey[400],
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            Text(
+                              _getEmptyStateMessage(),
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.grey[700],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  )
-                : SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
+                    )
+                    : SliverList(
+                      delegate: SliverChildBuilderDelegate((context, index) {
                         final task = filteredTasks[index];
                         return _buildTaskCard(task, index);
-                      },
-                      childCount: filteredTasks.length,
+                      }, childCount: filteredTasks.length),
                     ),
-                  ),
           ),
           SliverToBoxAdapter(
-            child: SizedBox(height: 80), // Espacio para que no choque con el FAB
+            child: SizedBox(
+              height: 80,
+            ), // Espacio para que no choque con el FAB
           ),
         ],
       ),
@@ -505,7 +515,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
 
   Widget _buildFilterChip(TaskFilter filter, String label) {
     final isSelected = _currentFilter == filter;
-    
+
     return ChoiceChip(
       label: Text(label),
       selected: isSelected,
@@ -526,16 +536,13 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
 
   Widget _buildTaskCard(Task task, int index) {
     final borderColor = task.color ?? Colors.indigoAccent;
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Card(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(
-            color: borderColor.withOpacity(0.5),
-            width: 2,
-          ),
+          side: BorderSide(color: borderColor.withOpacity(0.5), width: 2),
         ),
         child: Dismissible(
           key: Key(task.title + task.createdAt.toString()),
@@ -546,10 +553,7 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
             ),
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(left: 16),
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
           secondaryBackground: Container(
             decoration: BoxDecoration(
@@ -558,16 +562,16 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
             ),
             alignment: Alignment.centerRight,
             padding: const EdgeInsets.only(right: 16),
-            child: const Icon(
-              Icons.delete,
-              color: Colors.white,
-            ),
+            child: const Icon(Icons.delete, color: Colors.white),
           ),
           onDismissed: (direction) {
             _deleteTask(index);
           },
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 8,
+            ),
             leading: Checkbox(
               activeColor: task.color ?? Colors.indigoAccent,
               shape: RoundedRectangleBorder(
@@ -581,19 +585,18 @@ class _TodoListScreenState extends State<TodoListScreen> with SingleTickerProvid
             title: Text(
               task.title,
               style: TextStyle(
-                decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                decoration:
+                    task.isCompleted ? TextDecoration.lineThrough : null,
                 color: task.isCompleted ? Colors.grey : Colors.black87,
-                fontWeight: task.isCompleted ? FontWeight.normal : FontWeight.bold,
+                fontWeight:
+                    task.isCompleted ? FontWeight.normal : FontWeight.bold,
               ),
             ),
             subtitle: Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 _getFormattedDate(task.createdAt),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey[600],
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ),
             trailing: IconButton(
